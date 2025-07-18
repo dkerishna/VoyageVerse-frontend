@@ -1,0 +1,25 @@
+.landing-hero {
+    height: 100vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/src/assets/landing.jpg') center/cover no-repeat;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 40px 0;
+    color: white;
+}
+
+.landing-hero h1,
+.landing-hero p {
+    color: white;
+}
+
+.card {
+    border-radius: 1rem;
+}
+
+.card img {
+    height: 180px;
+    object-fit: cover;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+}
