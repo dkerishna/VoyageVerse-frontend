@@ -1,50 +1,53 @@
 import { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/useAuth';
+import { Form, Button, Container, Alert } from 'react-bootstrap';
 
 export default function Register() {
+    const { signup } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const handleRegister = async (e) => {
+    const handleSubmit = async e => {
         e.preventDefault();
-        setError('');
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
+            setError('');
+            await signup(email, password);
             navigate('/dashboard');
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Signup failed. Please try again.');
         }
     };
 
     return (
-        <div className="container mt-5" style={{ maxWidth: '400px' }}>
+        <Container className="mt-5" style={{ maxWidth: '400px' }}>
             <h2 className="mb-4">Sign Up</h2>
-            {error && <div className="alert alert-danger">{error}</div>}
-            <form onSubmit={handleRegister}>
-                <input
-                    type="email"
-                    className="form-control mb-3"
-                    placeholder="Email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-                <input
-                    type="password"
-                    className="form-control mb-3"
-                    placeholder="Password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <button className="btn btn-primary w-100" type="submit">
-                    Create Account
-                </button>
-            </form>
-        </div>
+            {error && <Alert variant="danger">{error}</Alert>}
+            <Form onSubmit={handleSubmit}>
+                <Form.Group controlId="registerEmail" className="mb-3">
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        required
+                    />
+                </Form.Group>
+                <Form.Group controlId="registerPassword" className="mb-3">
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control
+                        type="password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        required
+                    />
+                </Form.Group>
+                <Button type="submit" variant="success" className="w-100">
+                    Sign Up
+                </Button>
+            </Form>
+        </Container>
     );
 }

@@ -3,10 +3,15 @@ import { Modal, Button, Form, Container, Row, Col, Card } from 'react-bootstrap'
 import './Landing.css';
 import { motion } from 'framer-motion';
 import AuthModal from '../components/AuthModal';
+import { useAuth } from '../contexts/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export default function Landing() {
     const [showLogin, setShowLogin] = useState(false);
     const [showSignup, setShowSignup] = useState(false);
+    const { login, signup } = useAuth();
+    const navigate = useNavigate();
+
 
     return (
         <div className="landing-hero">
@@ -79,14 +84,75 @@ export default function Landing() {
                 </Row>
             </Container>
 
-            <AuthModal
-                show={showLogin || showSignup}
-                mode={showSignup ? 'signup' : 'login'}
-                handleClose={() => {
-                    setShowLogin(false);
-                    setShowSignup(false);
-                }}
-            />
+            {/* Login Modal */}
+            <Modal show={showLogin} onHide={() => setShowLogin(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Login</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form
+                        onSubmit={async e => {
+                            e.preventDefault();
+                            try {
+                                const email = e.target.loginEmail.value;
+                                const password = e.target.loginPassword.value;
+                                await login(email, password);
+                                setShowLogin(false);
+                                navigate('/dashboard');
+                            } catch (err) {
+                                alert(err.message || 'Login failed.');
+                            }
+                        }}
+                    >
+                        <Form.Group controlId="loginEmail">
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control type="email" required />
+                        </Form.Group>
+                        <Form.Group controlId="loginPassword" className="mt-3">
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control type="password" required />
+                        </Form.Group>
+                        <Button type="submit" className="mt-4 w-100" variant="success">
+                            Login
+                        </Button>
+                    </Form>
+                </Modal.Body>
+            </Modal>
+
+            {/* Signup Modal */}
+            <Modal show={showSignup} onHide={() => setShowSignup(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Sign Up</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form
+                        onSubmit={async e => {
+                            e.preventDefault();
+                            try {
+                                const email = e.target.signupEmail.value;
+                                const password = e.target.signupPassword.value;
+                                await signup(email, password);
+                                setShowSignup(false);
+                                navigate('/dashboard');
+                            } catch (err) {
+                                alert(err.message || 'Signup failed.');
+                            }
+                        }}
+                    >
+                        <Form.Group controlId="signupEmail">
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control type="email" required />
+                        </Form.Group>
+                        <Form.Group controlId="signupPassword" className="mt-3">
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control type="password" required />
+                        </Form.Group>
+                        <Button type="submit" className="mt-4 w-100" variant="primary">
+                            Sign Up
+                        </Button>
+                    </Form>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 }
