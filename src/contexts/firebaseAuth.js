@@ -10,7 +10,7 @@ export function signup(email, password) {
 }
 
 export function login(email, password) {
-    return signInWithEmailAndPassword(auth, password);
+    return signInWithEmailAndPassword(auth, email, password);
 }
 
 export function logout() {

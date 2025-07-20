@@ -15,7 +15,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/trip/:id" element={<TripDetails />} />
-        <Route path="/create" element={<CreateTrip />} />
+        <Route path="/create-trip" element={<CreateTrip />} />
       </Routes>
     </Router>
   );
