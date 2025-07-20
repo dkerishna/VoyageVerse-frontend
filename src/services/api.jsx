@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // Base URL (Vercel or localhost)
-// const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
-const API_URL = 'https://travel-companion-backend-seven.vercel.app/api';
+// const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/';
+const API_URL = 'https://travel-companion-backend-seven.vercel.app';
 
 console.log("API base URL is:", API_URL);
 
