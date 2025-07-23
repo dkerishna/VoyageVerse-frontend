@@ -78,3 +78,24 @@ export const deleteDestination = async (tripId, destinationId) => {
     const res = await api.delete(`/trips/${tripId}/destinations/${destinationId}`);
     return res.data;
 };
+
+// ==========================
+// Photo API functions
+// ==========================
+
+export const getPhotosForTrip = async (tripId) => {
+    const response = await api.get(`/trips/${tripId}/photos`);
+    return response.data;
+};
+
+// Upload a new photo
+export const uploadPhoto = async (tripId, photoData) => {
+    const response = await api.post(`/trips/${tripId}/photos`, photoData);
+    return response.data;
+};
+
+// Delete a photo
+export const deletePhoto = async (photoId) => {
+    const response = await api.delete(`/photos/${photoId}`);
+    return response.data;
+};
