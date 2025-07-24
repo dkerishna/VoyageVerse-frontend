@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Modal, Button, Form, Container, Row, Col, Card } from 'react-bootstrap';
-import './Landing.css';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/useAuth';
 import { useNavigate } from 'react-router-dom';
+import parisImg from '../assets/paris.jpg';
+import baliImg from '../assets/bali.jpg';
+import './Landing.css';
 
 export default function Landing() {
     const [showLogin, setShowLogin] = useState(false);
@@ -11,6 +13,31 @@ export default function Landing() {
     const { login, signup } = useAuth();
     const navigate = useNavigate();
 
+    const handleLogin = async e => {
+        e.preventDefault();
+        const email = e.target.loginEmail.value;
+        const password = e.target.loginPassword.value;
+        try {
+            await login(email, password);
+            setShowLogin(false);
+            navigate('/dashboard');
+        } catch (err) {
+            alert(err.message || 'Login failed.');
+        }
+    };
+
+    const handleSignup = async e => {
+        e.preventDefault();
+        const email = e.target.signupEmail.value;
+        const password = e.target.signupPassword.value;
+        try {
+            await signup(email, password);
+            setShowSignup(false);
+            navigate('/dashboard');
+        } catch (err) {
+            alert(err.message || 'Signup failed.');
+        }
+    };
 
     return (
         <div className="landing-hero">
@@ -56,7 +83,7 @@ export default function Landing() {
                         <Row>
                             <Col md={6}>
                                 <Card bg="secondary" text="light" className="mb-4 shadow-sm">
-                                    <Card.Img variant="top" src="/src/assets/paris.jpg" />
+                                    <Card.Img variant="top" src={parisImg} />
                                     <Card.Body>
                                         <Card.Title>My Europe Trip</Card.Title>
                                         <Card.Text>
@@ -68,7 +95,7 @@ export default function Landing() {
                             </Col>
                             <Col md={6}>
                                 <Card bg="secondary" text="light" className="mb-4 shadow-sm">
-                                    <Card.Img variant="top" src="/src/assets/bali.jpg" />
+                                    <Card.Img variant="top" src={baliImg} />
                                     <Card.Body>
                                         <Card.Title>Beach Getaway</Card.Title>
                                         <Card.Text>
@@ -89,20 +116,7 @@ export default function Landing() {
                     <Modal.Title>Login</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form
-                        onSubmit={async e => {
-                            e.preventDefault();
-                            try {
-                                const email = e.target.loginEmail.value;
-                                const password = e.target.loginPassword.value;
-                                await login(email, password);
-                                setShowLogin(false);
-                                navigate('/dashboard');
-                            } catch (err) {
-                                alert(err.message || 'Login failed.');
-                            }
-                        }}
-                    >
+                    <Form onSubmit={handleLogin}>
                         <Form.Group controlId="loginEmail">
                             <Form.Label>Email</Form.Label>
                             <Form.Control type="email" required />
@@ -124,20 +138,7 @@ export default function Landing() {
                     <Modal.Title>Sign Up</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form
-                        onSubmit={async e => {
-                            e.preventDefault();
-                            try {
-                                const email = e.target.signupEmail.value;
-                                const password = e.target.signupPassword.value;
-                                await signup(email, password);
-                                setShowSignup(false);
-                                navigate('/dashboard');
-                            } catch (err) {
-                                alert(err.message || 'Signup failed.');
-                            }
-                        }}
-                    >
+                    <Form onSubmit={handleSignup}>
                         <Form.Group controlId="signupEmail">
                             <Form.Label>Email</Form.Label>
                             <Form.Control type="email" required />
