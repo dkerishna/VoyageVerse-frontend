@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Modal, Button, Form, Container, Row, Col, Card } from 'react-bootstrap';
 import './Landing.css';
 import { motion } from 'framer-motion';
-import AuthModal from '../components/AuthModal';
 import { useAuth } from '../contexts/useAuth';
 import { useNavigate } from 'react-router-dom';
 

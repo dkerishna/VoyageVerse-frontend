@@ -65,7 +65,7 @@ export default function AuthModal({ type, show, handleClose }) {
 
                     <Button
                         type="submit"
-                        variant={isLogin ? 'primary' : 'success'}
+                        variant={isLogin ? 'success' : 'primary'}
                         className="mt-4 w-100"
                         disabled={loading}
                     >
