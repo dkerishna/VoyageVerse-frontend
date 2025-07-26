@@ -11,6 +11,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import AppNavbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import { useState } from 'react';
+import AppFooter from './components/Footer';
 
 function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -43,6 +44,7 @@ function App() {
           <Route path="/edit-trip/:id" element={<EditTrip />} />
           <Route path="/trips/:tripId/photos" element={<TripPhotos />} />
         </Routes>
+        <AppFooter />
       </Router>
     </AuthProvider>
 

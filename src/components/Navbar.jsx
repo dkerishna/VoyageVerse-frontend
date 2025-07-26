@@ -227,7 +227,7 @@ export default function AppNavbar({ onLoginClick, onSignupClick }) {
 
                         {/* Right: Auth Controls */}
                         <Nav className="ms-auto">
-                            {currentUser ? (
+                            {currentUser && !isLanding ? (
                                 <div className="d-flex align-items-center gap-3">
                                     {/* User Greeting */}
                                     <span

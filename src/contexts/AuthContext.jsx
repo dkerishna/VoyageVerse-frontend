@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const token = await userCredential.user.getIdToken();
-        console.log("Firebase Id Token:", token); // 🔐 Log token for debugging
+        //console.log("Firebase Id Token:", token); // 🔐 Log token for debugging
         localStorage.setItem('token', token); // ✅ Save token
         return userCredential;
     };

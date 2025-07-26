@@ -669,6 +669,277 @@ export default function TripDetails() {
                         </div>
                     </div>
 
+                    {/* Destinations Section */}
+                    {destinations.length > 0 && (
+                        <div
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.15)',
+                                backdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                borderRadius: '25px',
+                                padding: '2rem',
+                                marginBottom: '2rem',
+                                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)'
+                            }}
+                        >
+                            <div className="d-flex justify-content-between align-items-center mb-4">
+                                <h4
+                                    style={{
+                                        color: 'white',
+                                        fontWeight: '600',
+                                        margin: 0
+                                    }}
+                                >
+                                    📍 Trip Destinations ({destinations.length})
+                                </h4>
+                                <Button
+                                    onClick={() => navigate(`/edit-trip/${trip.id}`)}
+                                    style={{
+                                        background: 'rgba(255,255,255,0.2)',
+                                        border: '1px solid rgba(255,255,255,0.3)',
+                                        color: 'white',
+                                        borderRadius: '12px',
+                                        padding: '8px 16px',
+                                        fontSize: '0.9rem',
+                                        fontWeight: '600'
+                                    }}
+                                >
+                                    ✏️ Edit Destinations
+                                </Button>
+                            </div>
+
+                            <Row>
+                                {destinations
+                                    .sort((a, b) => a.priority_level - b.priority_level || a.order_index - b.order_index)
+                                    .map((destination, index) => {
+                                        const getPriorityInfo = (level) => {
+                                            const priorities = {
+                                                1: { text: 'Must See', color: '#ff6b6b', emoji: '⭐' },
+                                                2: { text: 'High Priority', color: '#ffa726', emoji: '🌟' },
+                                                3: { text: 'Medium Priority', color: '#42a5f5', emoji: '✨' },
+                                                4: { text: 'Low Priority', color: '#66bb6a', emoji: '💫' },
+                                                5: { text: 'Optional', color: '#ab47bc', emoji: '🌙' }
+                                            };
+                                            return priorities[level] || priorities[3];
+                                        };
+
+                                        const priority = getPriorityInfo(destination.priority_level);
+
+                                        return (
+                                            <Col key={destination.id} md={6} lg={4} className="mb-3">
+                                                <div
+                                                    style={{
+                                                        background: destination.is_completed
+                                                            ? 'rgba(76, 175, 80, 0.15)'
+                                                            : 'rgba(255,255,255,0.1)',
+                                                        border: destination.is_completed
+                                                            ? '2px solid rgba(76, 175, 80, 0.4)'
+                                                            : '1px solid rgba(255,255,255,0.2)',
+                                                        borderRadius: '20px',
+                                                        padding: '1.5rem',
+                                                        transition: 'all 0.3s ease',
+                                                        position: 'relative',
+                                                        overflow: 'hidden'
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.transform = 'translateY(-5px)';
+                                                        e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.2)';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.transform = 'translateY(0)';
+                                                        e.currentTarget.style.boxShadow = 'none';
+                                                    }}
+                                                >
+                                                    {/* Completion Status */}
+                                                    {destination.is_completed && (
+                                                        <div
+                                                            style={{
+                                                                position: 'absolute',
+                                                                top: '15px',
+                                                                right: '15px',
+                                                                background: 'rgba(76, 175, 80, 0.3)',
+                                                                borderRadius: '50%',
+                                                                width: '30px',
+                                                                height: '30px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                fontSize: '1rem'
+                                                            }}
+                                                        >
+                                                            ✅
+                                                        </div>
+                                                    )}
+
+                                                    {/* Order Number */}
+                                                    <div
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '15px',
+                                                            left: '15px',
+                                                            background: 'rgba(255,255,255,0.2)',
+                                                            borderRadius: '50%',
+                                                            width: '30px',
+                                                            height: '30px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            fontSize: '0.9rem',
+                                                            fontWeight: '600',
+                                                            color: 'white'
+                                                        }}
+                                                    >
+                                                        {index + 1}
+                                                    </div>
+
+                                                    {/* Content */}
+                                                    <div style={{ marginTop: '2rem' }}>
+                                                        <div className="d-flex justify-content-between align-items-start mb-2">
+                                                            <h5
+                                                                style={{
+                                                                    color: 'white',
+                                                                    fontWeight: '600',
+                                                                    fontSize: '1.2rem',
+                                                                    margin: 0,
+                                                                    lineHeight: '1.3'
+                                                                }}
+                                                            >
+                                                                {destination.name}
+                                                            </h5>
+                                                        </div>
+
+                                                        {destination.destination_type && (
+                                                            <div
+                                                                style={{
+                                                                    background: 'rgba(255,255,255,0.2)',
+                                                                    color: 'white',
+                                                                    padding: '4px 12px',
+                                                                    borderRadius: '12px',
+                                                                    fontSize: '0.8rem',
+                                                                    fontWeight: '500',
+                                                                    display: 'inline-block',
+                                                                    marginBottom: '1rem',
+                                                                    textTransform: 'capitalize'
+                                                                }}
+                                                            >
+                                                                {destination.destination_type}
+                                                            </div>
+                                                        )}
+
+                                                        {destination.description && (
+                                                            <p
+                                                                style={{
+                                                                    color: 'rgba(255,255,255,0.8)',
+                                                                    margin: '0 0 1rem 0',
+                                                                    fontSize: '0.9rem',
+                                                                    lineHeight: '1.4'
+                                                                }}
+                                                            >
+                                                                {destination.description}
+                                                            </p>
+                                                        )}
+
+                                                        {/* Priority Badge */}
+                                                        <div
+                                                            style={{
+                                                                background: `${priority.color}30`,
+                                                                border: `1px solid ${priority.color}60`,
+                                                                color: 'white',
+                                                                padding: '6px 12px',
+                                                                borderRadius: '15px',
+                                                                fontSize: '0.8rem',
+                                                                fontWeight: '600',
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                gap: '5px',
+                                                                marginBottom: '1rem'
+                                                            }}
+                                                        >
+                                                            <span>{priority.emoji}</span>
+                                                            {priority.text}
+                                                        </div>
+
+                                                        {/* Visit Details */}
+                                                        {(destination.visit_date || destination.visit_time) && (
+                                                            <div style={{ marginBottom: '1rem' }}>
+                                                                <div
+                                                                    style={{
+                                                                        color: 'rgba(255,255,255,0.7)',
+                                                                        fontSize: '0.8rem',
+                                                                        marginBottom: '2px'
+                                                                    }}
+                                                                >
+                                                                    Planned Visit
+                                                                </div>
+                                                                <div
+                                                                    style={{
+                                                                        color: 'white',
+                                                                        fontSize: '0.9rem',
+                                                                        fontWeight: '500'
+                                                                    }}
+                                                                >
+                                                                    📅 {destination.visit_date && new Date(destination.visit_date).toLocaleDateString()}
+                                                                    {destination.visit_time && ` at ${destination.visit_time}`}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Address */}
+                                                        {destination.address && (
+                                                            <div style={{ marginBottom: '1rem' }}>
+                                                                <div
+                                                                    style={{
+                                                                        color: 'rgba(255,255,255,0.7)',
+                                                                        fontSize: '0.8rem',
+                                                                        marginBottom: '2px'
+                                                                    }}
+                                                                >
+                                                                    Location
+                                                                </div>
+                                                                <div
+                                                                    style={{
+                                                                        color: 'white',
+                                                                        fontSize: '0.9rem',
+                                                                        fontWeight: '500'
+                                                                    }}
+                                                                >
+                                                                    📍 {destination.address}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Price Range */}
+                                                        {destination.price_range && (
+                                                            <div>
+                                                                <div
+                                                                    style={{
+                                                                        color: 'rgba(255,255,255,0.7)',
+                                                                        fontSize: '0.8rem',
+                                                                        marginBottom: '2px'
+                                                                    }}
+                                                                >
+                                                                    Price Range
+                                                                </div>
+                                                                <div
+                                                                    style={{
+                                                                        color: 'white',
+                                                                        fontSize: '0.9rem',
+                                                                        fontWeight: '500'
+                                                                    }}
+                                                                >
+                                                                    💰 {destination.price_range}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </Col>
+                                        );
+                                    })}
+                            </Row>
+                        </div>
+                    )}
+
                     {/* Photo Upload Section */}
                     <div
                         style={{
