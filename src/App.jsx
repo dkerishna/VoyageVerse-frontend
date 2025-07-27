@@ -12,6 +12,8 @@ import AppNavbar from './components/Navbar';
 import AuthModal from './components/AuthModal';
 import { useState } from 'react';
 import AppFooter from './components/Footer';
+import MyAccount from './pages/MyAccount';
+import ContactUs from './pages/ContactUs';
 
 function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -43,6 +45,8 @@ function App() {
           <Route path="/create-trip" element={<CreateTrip />} />
           <Route path="/edit-trip/:id" element={<EditTrip />} />
           <Route path="/trips/:tripId/photos" element={<TripPhotos />} />
+          <Route path="/account" element={<MyAccount />} />
+          <Route path="/contact" element={<ContactUs />} />
         </Routes>
         <AppFooter />
       </Router>
