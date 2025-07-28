@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getDestinationsByTripId, getPhotosForTrip, getTripById } from '../services/api';
+import { getDestinationsByTripId, getPhotosForTrip, getTripById, deletePhoto } from '../services/api';
 import { Container, Row, Col, Button, Spinner, Badge } from 'react-bootstrap';
 
 export default function TripPhotos() {
@@ -91,6 +91,43 @@ export default function TripPhotos() {
 
     const closePhotoModal = () => {
         setSelectedPhoto(null);
+    };
+
+    const handleDeletePhoto = async (photoId) => {
+        if (window.confirm('Are you sure you want to delete this photo? This action cannot be undone.')) {
+            try {
+                await deletePhoto(photoId);
+
+                // Refresh the photos data
+                const allPhotos = await getPhotosForTrip(tripId);
+
+                // Re-group photos by destination
+                const grouped = {};
+                destinations.forEach(dest => {
+                    grouped[dest.id] = [];
+                });
+
+                const photosWithoutDestination = [];
+                allPhotos.forEach(photo => {
+                    if (photo.destination_id && grouped[photo.destination_id]) {
+                        grouped[photo.destination_id].push(photo);
+                    } else {
+                        photosWithoutDestination.push(photo);
+                    }
+                });
+
+                setPhotosByDestination(grouped);
+                setTripPhotos(photosWithoutDestination);
+
+                // Close modal if the deleted photo was being viewed
+                if (selectedPhoto && selectedPhoto.id === photoId) {
+                    setSelectedPhoto(null);
+                }
+            } catch (err) {
+                console.error('Failed to delete photo:', err);
+                alert('Failed to delete photo. Please try again.');
+            }
+        }
     };
 
     if (loading) {
@@ -362,6 +399,38 @@ export default function TripPhotos() {
                                                 e.currentTarget.style.boxShadow = 'none';
                                             }}
                                         >
+                                            {/* Add delete button */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeletePhoto(photo.id);
+                                                }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: '8px',
+                                                    right: '8px',
+                                                    background: 'rgba(220, 53, 69, 0.8)',
+                                                    border: 'none',
+                                                    color: 'white',
+                                                    borderRadius: '50%',
+                                                    width: '28px',
+                                                    height: '28px',
+                                                    fontSize: '0.8rem',
+                                                    cursor: 'pointer',
+                                                    zIndex: 10,
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.target.style.background = 'rgba(220, 53, 69, 1)';
+                                                    e.target.style.transform = 'scale(1.1)';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.target.style.background = 'rgba(220, 53, 69, 0.8)';
+                                                    e.target.style.transform = 'scale(1)';
+                                                }}
+                                            >
+                                                ×
+                                            </button>
                                             <img
                                                 src={photo.image_url}
                                                 alt={photo.caption || 'Trip photo'}
@@ -499,6 +568,38 @@ export default function TripPhotos() {
                                                     e.currentTarget.style.boxShadow = 'none';
                                                 }}
                                             >
+                                                {/* Add delete button */}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeletePhoto(photo.id);
+                                                    }}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '8px',
+                                                        right: '8px',
+                                                        background: 'rgba(220, 53, 69, 0.8)',
+                                                        border: 'none',
+                                                        color: 'white',
+                                                        borderRadius: '50%',
+                                                        width: '28px',
+                                                        height: '28px',
+                                                        fontSize: '0.8rem',
+                                                        cursor: 'pointer',
+                                                        zIndex: 10,
+                                                        transition: 'all 0.3s ease'
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.target.style.background = 'rgba(220, 53, 69, 1)';
+                                                        e.target.style.transform = 'scale(1.1)';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.target.style.background = 'rgba(220, 53, 69, 0.8)';
+                                                        e.target.style.transform = 'scale(1)';
+                                                    }}
+                                                >
+                                                    ×
+                                                </button>
                                                 <img
                                                     src={photo.image_url}
                                                     alt={photo.caption || 'Destination photo'}
@@ -573,7 +674,7 @@ export default function TripPhotos() {
                         </div>
                     )}
 
-                    {/* Debug Information - You can remove this section after testing */}
+                    {/* Debug Information - You can remove this section after testing
                     {window.location.hostname === 'localhost' && (
                         <div
                             style={{
@@ -595,7 +696,7 @@ export default function TripPhotos() {
                                 return acc;
                             }, {}), null, 2)}
                         </div>
-                    )}
+                    )} */}
                 </Container>
 
                 {/* Photo Modal */}
