@@ -133,7 +133,7 @@ export default function Landing() {
                     flexDirection: 'column',
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     position: 'relative',
-                    // overflow: 'hidden',
+                    overflow: 'hidden',
                 }}
             >
                 {/* Animated background elements */}
@@ -164,8 +164,8 @@ export default function Landing() {
 
                 <div className="container" style={{
                     position: 'relative', zIndex: 2,
-                    // flex: 1, // allow to grow/shrink
-                    // overflowY: 'auto', // scroll if needed, 
+                    flex: 1, // allow to grow/shrink
+                    overflowY: 'auto', // scroll if needed, 
                     paddingTop: 'clamp(60px, 8vh, 100px)',
                     paddingLeft: 'clamp(15px, 5vw, 50px)',
                     paddingRight: 'clamp(15px, 5vw, 50px)', paddingBottom: '4rem'
@@ -697,8 +697,6 @@ export default function Landing() {
                         </div>
                     </div>
                 )}
-
-                <AppFooter />
 
                 <style>{`
                     @keyframes float {

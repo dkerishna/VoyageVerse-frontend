@@ -49,6 +49,7 @@ function App() {
           <Route path="/account" element={<MyAccount />} />
           <Route path="/contact" element={<ContactUs />} />
         </Routes>
+        <AppFooter />
       </Router>
     </AuthProvider>
 
