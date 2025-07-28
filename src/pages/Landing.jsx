@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/useAuth';
 import { useNavigate } from 'react-router-dom';
 import './Landing.css';
+import AppFooter from '../components/Footer';
 
 export default function Landing() {
     const [showLogin, setShowLogin] = useState(false);
@@ -127,10 +128,12 @@ export default function Landing() {
             <div
                 className="landing-hero"
                 style={{
-                    minHeight: '100vh',
+                    height: '100vh',
+                    display: 'flex',
+                    flexDirection: 'column',
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     position: 'relative',
-                    overflow: 'hidden'
+                    // overflow: 'hidden',
                 }}
             >
                 {/* Animated background elements */}
@@ -159,11 +162,18 @@ export default function Landing() {
                     }}
                 />
 
-                <div className="container" style={{ position: 'relative', zIndex: 2, paddingTop: '4rem', paddingBottom: '4rem' }}>
+                <div className="container" style={{
+                    position: 'relative', zIndex: 2,
+                    // flex: 1, // allow to grow/shrink
+                    // overflowY: 'auto', // scroll if needed, 
+                    paddingTop: 'clamp(60px, 8vh, 100px)',
+                    paddingLeft: 'clamp(15px, 5vw, 50px)',
+                    paddingRight: 'clamp(15px, 5vw, 50px)', paddingBottom: '4rem'
+                }}>
                     {/* Hero Section */}
                     <div className="row align-items-center mb-5">
                         {/* LEFT COLUMN */}
-                        <div className="col-lg-4 text-center text-lg-start mb-5 mb-lg-0">
+                        <div className="col-lg-4 col-md-12 text-center text-lg-start mb-4 mb-lg-0">
                             <div
                                 style={{
                                     opacity: 0,
@@ -172,14 +182,15 @@ export default function Landing() {
                                 }}
                             >
                                 <h1
-                                    className="display-2 fw-bold mb-4"
+                                    className="fw-bold mb-3 mb-lg-4"
                                     style={{
                                         color: 'white',
                                         textShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                                        lineHeight: '1.1'
+                                        lineHeight: '1.1',
+                                        fontSize: 'clamp(2rem, 8vw, 4rem)'
                                     }}
                                 >
-                                    Travel<br />
+                                    VoyageVerse<br />
                                     <span
                                         style={{
                                             background: 'linear-gradient(45deg, #ffd89b, #19547b)',
@@ -188,7 +199,7 @@ export default function Landing() {
                                             backgroundClip: 'text'
                                         }}
                                     >
-                                        Companion
+                                        Travel Companion
                                     </span>
                                 </h1>
                             </div>
@@ -274,7 +285,7 @@ export default function Landing() {
                         </div>
 
                         {/* RIGHT COLUMN - DEMO */}
-                        <div className="col-lg-8">
+                        <div className="col-lg-8 col-md-12 mt-4 mt-lg-0">
                             <div
                                 style={{
                                     opacity: 0,
@@ -292,7 +303,7 @@ export default function Landing() {
 
                             <div className="row">
                                 {tripCards.map((trip, index) => (
-                                    <div key={index} className="col-md-6 col-lg-4 mb-4">
+                                    <div key={index} className="col-sm-6 col-md-6 col-lg-4 mb-3 mb-md-4">
                                         <div
                                             className="card h-100 shadow-lg"
                                             style={{
@@ -319,7 +330,7 @@ export default function Landing() {
                                         >
                                             <div
                                                 style={{
-                                                    height: '180px',
+                                                    height: 'clamp(120px, 20vw, 180px)',
                                                     background: `${trip.gradient}, url(${trip.image})`,
                                                     backgroundSize: 'cover',
                                                     backgroundPosition: 'center',
@@ -455,6 +466,7 @@ export default function Landing() {
                                 <div style={{ color: 'white', fontSize: '3rem', marginBottom: '1rem' }}>🗺️</div>
                                 <h5 style={{ color: 'white', fontWeight: '600' }}>Smart Planning</h5>
                                 <p style={{ color: 'rgba(255,255,255,0.8)' }}>AI-powered itinerary suggestions tailored to you</p>
+                                <p style={{ color: 'rgba(255, 59, 59, 0.8)' }}>Coming Soon!</p>
                             </div>
                         </div>
                         <div className="col-md-4 mb-4">
@@ -479,6 +491,7 @@ export default function Landing() {
                                 <div style={{ color: 'white', fontSize: '3rem', marginBottom: '1rem' }}>📸</div>
                                 <h5 style={{ color: 'white', fontWeight: '600' }}>Memory Keeper</h5>
                                 <p style={{ color: 'rgba(255,255,255,0.8)' }}>Preserve your travel moments beautifully</p>
+                                <p style={{ color: 'rgba(255, 59, 59, 0.8)' }}>Coming Soon!</p>
                             </div>
                         </div>
                         <div className="col-md-4 mb-4">
@@ -503,6 +516,7 @@ export default function Landing() {
                                 <div style={{ color: 'white', fontSize: '3rem', marginBottom: '1rem' }}>🌟</div>
                                 <h5 style={{ color: 'white', fontWeight: '600' }}>Hidden Gems</h5>
                                 <p style={{ color: 'rgba(255,255,255,0.8)' }}>Discover off-the-beaten-path destinations</p>
+                                <p style={{ color: 'rgba(255, 59, 59, 0.8)' }}>Coming Soon!</p>
                             </div>
                         </div>
                     </div>
@@ -683,6 +697,8 @@ export default function Landing() {
                         </div>
                     </div>
                 )}
+
+                <AppFooter />
 
                 <style>{`
                     @keyframes float {

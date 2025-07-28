@@ -135,9 +135,9 @@ export default function AppNavbar({ onLoginClick, onSignupClick }) {
                                     ➕ Create
                                 </Nav.Link>
 
-                                <Nav.Link
+                                {/* <Nav.Link
                                     as={Link}
-                                    to="/photos"
+                                    to={`/trips/${trip.id}/photos`}
                                     style={{
                                         color: '#2c3e50',
                                         fontWeight: '600',
@@ -163,7 +163,7 @@ export default function AppNavbar({ onLoginClick, onSignupClick }) {
                                     }}
                                 >
                                     📸 Photos
-                                </Nav.Link>
+                                </Nav.Link> */}
 
                                 {/* More Dropdown */}
                                 <NavDropdown

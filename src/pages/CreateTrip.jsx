@@ -381,7 +381,7 @@ const CreateTrip = () => {
                     {/* Header */}
                     <div className="d-flex align-items-center mb-4">
                         <Button
-                            onClick={() => navigate('/dashboard')}
+                            onClick={() => navigate('/trip/:id')}
                             style={{
                                 background: 'rgba(255,255,255,0.2)',
                                 border: '1px solid rgba(255,255,255,0.3)',
@@ -398,7 +398,7 @@ const CreateTrip = () => {
                                 e.target.style.background = 'rgba(255,255,255,0.2)';
                             }}
                         >
-                            ← Back to Dashboard
+                            ← Back to Trips
                         </Button>
                         <h2
                             style={{

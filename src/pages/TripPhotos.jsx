@@ -17,6 +17,11 @@ export default function TripPhotos() {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log('=== DEBUG ===');
+                console.log('tripId from useParams:', tripId);
+                console.log('tripId type:', typeof tripId);
+                console.log('tripId value:', JSON.stringify(tripId));
+
                 console.log('Fetching data for trip:', tripId);
 
                 // Fetch trip details
@@ -553,7 +558,7 @@ export default function TripPhotos() {
                                 Start capturing memories! Photos will appear here as you add them to your trip.
                             </p>
                             <Button
-                                onClick={() => navigate(`/trip/${tripId}`)}
+                                onClick={() => navigate(`/trips/${trip.id}/photos`)}
                                 style={{
                                     background: 'linear-gradient(45deg, #ffd89b, #19547b)',
                                     border: 'none',

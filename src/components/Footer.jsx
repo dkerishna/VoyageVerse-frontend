@@ -230,9 +230,9 @@ export default function AppFooter() {
                                         Create Trip
                                     </Link>
                                 </li>
-                                <li style={{ marginBottom: '0.5rem' }}>
+                                {/* <li style={{ marginBottom: '0.5rem' }}>
                                     <Link
-                                        to="/photos"
+                                        to={`/trips/${trip.id}/photos`}
                                         style={{
                                             color: '#6c757d',
                                             textDecoration: 'none',
@@ -248,7 +248,7 @@ export default function AppFooter() {
                                     >
                                         My Photos
                                     </Link>
-                                </li>
+                                </li> */}
                             </ul>
                         </Col>
 

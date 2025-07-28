@@ -14,6 +14,7 @@ import { useState } from 'react';
 import AppFooter from './components/Footer';
 import MyAccount from './pages/MyAccount';
 import ContactUs from './pages/ContactUs';
+import './App.css';
 
 function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -48,7 +49,6 @@ function App() {
           <Route path="/account" element={<MyAccount />} />
           <Route path="/contact" element={<ContactUs />} />
         </Routes>
-        <AppFooter />
       </Router>
     </AuthProvider>
 
