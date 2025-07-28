@@ -59,7 +59,7 @@ export default function AppNavbar({ onLoginClick, onSignupClick }) {
                         }}
                     >
                         <span style={{ fontSize: '1.5rem' }}>✈️</span>
-                        TravelCompanion
+                        VoyageVerse
                     </Navbar.Brand>
 
                     {/* Mobile Toggle */}
