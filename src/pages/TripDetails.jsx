@@ -12,6 +12,46 @@ export default function TripDetails() {
     const [photos, setPhotos] = useState([]);
     const [destinations, setDestinations] = useState([]);
     const [selectedPhoto, setSelectedPhoto] = useState(null);
+    const [mapLoaded, setMapLoaded] = useState(false);
+
+    // Load Google Maps Script
+    useEffect(() => {
+        const loadGoogleMapsScript = () => {
+            if (window.google && window.google.maps && window.google.maps.places) {
+                setMapLoaded(true);
+                return;
+            }
+
+            const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+            if (existingScript) {
+                const checkLoaded = () => {
+                    if (window.google && window.google.maps && window.google.maps.places) {
+                        setMapLoaded(true);
+                    } else {
+                        setTimeout(checkLoaded, 100);
+                    }
+                };
+                checkLoaded();
+                return;
+            }
+
+            const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+            if (!apiKey) {
+                console.error('Google Maps API key not found. Please add VITE_GOOGLE_MAPS_API_KEY to your .env file');
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+            script.async = true;
+            script.defer = true;
+            script.onload = () => setMapLoaded(true);
+            script.onerror = () => console.error('Failed to load Google Maps script');
+            document.head.appendChild(script);
+        };
+
+        loadGoogleMapsScript();
+    }, []);
 
     useEffect(() => {
         const fetchTrip = async () => {
@@ -139,7 +179,7 @@ export default function TripDetails() {
                         </p>
                     </div>
                 </div>
-                <style jsx>{`
+                <style>{`
                     @keyframes spin {
                         0% { transform: rotate(0deg); }
                         100% { transform: rotate(360deg); }
@@ -905,7 +945,113 @@ export default function TripDetails() {
                                                                 >
                                                                     📍 {destination.address}
                                                                 </div>
+                                                                {/* Google Maps Link */}
+
+                                                                {(destination.latitude && destination.longitude) ? (
+                                                                    <a
+                                                                        href={`https://www.google.com/maps?q=${destination.latitude},${destination.longitude}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        style={{
+                                                                            display: 'inline-flex',
+                                                                            alignItems: 'center',
+                                                                            gap: '5px',
+                                                                            color: '#ffd89b',
+                                                                            textDecoration: 'none',
+                                                                            fontSize: '0.85rem',
+                                                                            fontWeight: '500',
+                                                                            transition: 'color 0.3s ease'
+                                                                        }}
+                                                                        onMouseEnter={(e) => e.target.style.color = '#fff'}
+                                                                        onMouseLeave={(e) => e.target.style.color = '#ffd89b'}
+                                                                    >
+                                                                        🗺️ Open in Google Maps
+                                                                    </a>
+                                                                ) : (
+                                                                    <a
+                                                                        href={`https://www.google.com/maps/search/${encodeURIComponent(destination.address)}`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        style={{
+                                                                            display: 'inline-flex',
+                                                                            alignItems: 'center',
+                                                                            gap: '5px',
+                                                                            color: '#ffd89b',
+                                                                            textDecoration: 'none',
+                                                                            fontSize: '0.85rem',
+                                                                            fontWeight: '500',
+                                                                            transition: 'color 0.3s ease'
+                                                                        }}
+                                                                        onMouseEnter={(e) => e.target.style.color = '#fff'}
+                                                                        onMouseLeave={(e) => e.target.style.color = '#ffd89b'}
+                                                                    >
+                                                                        🔍 Search in Google Maps
+                                                                    </a>
+                                                                )}
+                                                                {/* Mini map preview - only show if coordinates exist */}
+                                                                {mapLoaded && destination.latitude && destination.longitude && (
+                                                                    <div style={{ marginTop: '1rem' }}>
+                                                                        <div
+                                                                            ref={(el) => {
+                                                                                if (el && !el.dataset.mapInitialized) {
+                                                                                    // ✅ Convert to numbers explicitly
+                                                                                    const lat = parseFloat(destination.latitude);
+                                                                                    const lng = parseFloat(destination.longitude);
+
+                                                                                    // ✅ Validate the numbers are valid
+                                                                                    if (isNaN(lat) || isNaN(lng)) {
+                                                                                        console.error('Invalid coordinates:', { lat: destination.latitude, lng: destination.longitude });
+                                                                                        return;
+                                                                                    }
+
+                                                                                    const map = new window.google.maps.Map(el, {
+                                                                                        center: { lat: lat, lng: lng }, // ✅ Use converted numbers
+                                                                                        zoom: 15,
+                                                                                        styles: [
+                                                                                            {
+                                                                                                featureType: 'all',
+                                                                                                elementType: 'geometry.fill',
+                                                                                                stylers: [{ color: '#f5f5f5' }]
+                                                                                            },
+                                                                                            {
+                                                                                                featureType: 'water',
+                                                                                                elementType: 'geometry',
+                                                                                                stylers: [{ color: '#667eea' }]
+                                                                                            },
+                                                                                            {
+                                                                                                featureType: 'landscape',
+                                                                                                elementType: 'geometry',
+                                                                                                stylers: [{ color: '#f9f9f9' }]
+                                                                                            }
+                                                                                        ]
+                                                                                    });
+                                                                                    new window.google.maps.Marker({
+                                                                                        position: { lat: lat, lng: lng }, // ✅ Use converted numbers
+                                                                                        map: map,
+                                                                                        title: destination.name,
+                                                                                        icon: {
+                                                                                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="6" fill="#ffd89b" stroke="white" stroke-width="2"/>
+                                </svg>
+                            `),
+                                                                                            scaledSize: new window.google.maps.Size(24, 24)
+                                                                                        }
+                                                                                    });
+                                                                                    el.dataset.mapInitialized = 'true';
+                                                                                }
+                                                                            }}
+                                                                            style={{
+                                                                                height: '120px',
+                                                                                borderRadius: '10px',
+                                                                                border: '1px solid rgba(255,255,255,0.3)',
+                                                                                overflow: 'hidden'
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                )}
                                                             </div>
+
                                                         )}
 
                                                         {/* Price Range */}
@@ -937,6 +1083,88 @@ export default function TripDetails() {
                                         );
                                     })}
                             </Row>
+                        </div>
+                    )}
+                    {/* Trip Overview Map */}
+                    {mapLoaded && destinations.some(d => d.location_lat && d.location_lng) && (
+                        <div
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.15)',
+                                backdropFilter: 'blur(20px)',
+                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                borderRadius: '25px',
+                                padding: '2rem',
+                                marginBottom: '2rem',
+                                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)'
+                            }}
+                        >
+                            <h4
+                                style={{
+                                    color: 'white',
+                                    marginBottom: '1.5rem',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                🗺️ Trip Map Overview
+                            </h4>
+                            <div
+                                ref={(el) => {
+                                    if (el && !el.dataset.tripMapInitialized) {
+                                        // Get all destinations with coordinates
+                                        const validDestinations = destinations.filter(d => d.location_lat && d.location_lng);
+
+                                        if (validDestinations.length > 0) {
+                                            // Center on first destination
+                                            const centerLat = validDestinations[0].location_lat;
+                                            const centerLng = validDestinations[0].location_lng;
+
+                                            const map = new window.google.maps.Map(el, {
+                                                center: { lat: centerLat, lng: centerLng },
+                                                zoom: 12,
+                                                styles: [
+                                                    {
+                                                        featureType: 'all',
+                                                        elementType: 'geometry.fill',
+                                                        stylers: [{ color: '#f5f5f5' }]
+                                                    },
+                                                    {
+                                                        featureType: 'water',
+                                                        elementType: 'geometry',
+                                                        stylers: [{ color: '#667eea' }]
+                                                    },
+                                                    {
+                                                        featureType: 'landscape',
+                                                        elementType: 'geometry',
+                                                        stylers: [{ color: '#f9f9f9' }]
+                                                    }
+                                                ]
+                                            });
+
+                                            // Add markers for all destinations
+                                            validDestinations.forEach((dest, index) => {
+                                                new window.google.maps.Marker({
+                                                    position: { lat: dest.location_lat, lng: dest.location_lng },
+                                                    map: map,
+                                                    title: dest.name,
+                                                    label: {
+                                                        text: (index + 1).toString(),
+                                                        color: 'white',
+                                                        fontWeight: 'bold'
+                                                    }
+                                                });
+                                            });
+
+                                            el.dataset.tripMapInitialized = 'true';
+                                        }
+                                    }
+                                }}
+                                style={{
+                                    height: '400px',
+                                    borderRadius: '15px',
+                                    border: '2px solid rgba(255,255,255,0.3)',
+                                    overflow: 'hidden'
+                                }}
+                            />
                         </div>
                     )}
 
@@ -1151,7 +1379,7 @@ export default function TripDetails() {
                     </div>
                 )}
 
-                <style jsx>{`
+                <style>{`
                     @keyframes float {
                         0%, 100% { transform: translateY(0px) rotate(0deg); }
                         50% { transform: translateY(-20px) rotate(5deg); }

@@ -116,7 +116,7 @@ export default function AppFooter() {
                                         e.target.style.boxShadow = '0 4px 15px rgba(228, 64, 95, 0.3)';
                                     }}
                                 >
-                                    <i class="bi bi-instagram"></i>
+                                    <i className="bi bi-instagram"></i>
                                 </button>
 
                                 <button
@@ -145,7 +145,7 @@ export default function AppFooter() {
                                         e.target.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
                                     }}
                                 >
-                                    <i class="bi bi-tiktok"></i>
+                                    <i className="bi bi-tiktok"></i>
                                 </button>
 
                                 <button
@@ -174,7 +174,7 @@ export default function AppFooter() {
                                         e.target.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
                                     }}
                                 >
-                                    <i class="bi bi-twitter-x"></i>
+                                    <i className="bi bi-twitter-x"></i>
                                 </button>
                             </div>
                         </Col>

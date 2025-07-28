@@ -62,7 +62,7 @@ export default function Dashboard() {
                         </p>
                     </div>
                 </div>
-                <style jsx>{`
+                <style>{`
                     @keyframes spin {
                         0% { transform: rotate(0deg); }
                         100% { transform: rotate(360deg); }
@@ -361,7 +361,7 @@ export default function Dashboard() {
                     )}
                 </Container>
 
-                <style jsx>{`
+                <style>{`
                     @keyframes float {
                         0%, 100% { transform: translateY(0px) rotate(0deg); }
                         50% { transform: translateY(-20px) rotate(5deg); }

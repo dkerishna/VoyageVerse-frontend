@@ -69,13 +69,13 @@ export const addDestination = async (tripId, destinationData) => {
     return res.data;
 };
 
-export const updateDestination = async (tripId, destinationId, destinationData) => {
-    const res = await api.put(`/trips/${tripId}/destinations/${destinationId}`, destinationData);
+export const updateDestination = async (destinationId, destinationData) => {
+    const res = await api.put(`/destinations/${destinationId}`, destinationData);
     return res.data;
 };
 
-export const deleteDestination = async (tripId, destinationId) => {
-    const res = await api.delete(`/trips/${tripId}/destinations/${destinationId}`);
+export const deleteDestination = async (destinationId) => {
+    const res = await api.delete(`/destinations/${destinationId}`);
     return res.data;
 };
 
@@ -98,4 +98,44 @@ export const uploadPhoto = async (tripId, photoData) => {
 export const deletePhoto = async (photoId) => {
     const response = await api.delete(`/photos/${photoId}`);
     return response.data;
+};
+
+// ============================
+// User Profile API functions
+// ============================
+
+// Get user profile
+export const getUserProfile = async () => {
+    try {
+        const res = await api.get('/user/profile');
+        return res.data;
+    } catch (error) {
+        if (error.response?.status === 404) {
+            return null; // Profile not found
+        }
+        throw error;
+    }
+};
+
+// Create or update user profile
+export const saveUserProfile = async (profileData) => {
+    const payload = {
+        display_name: profileData.displayName,
+        location: profileData.location,
+        location_lat: profileData.locationCoords?.lat || null,
+        location_lng: profileData.locationCoords?.lng || null,
+        travel_style: profileData.travelStyle,
+        favorite_destinations: profileData.favoriteDestinations,
+        bio: profileData.bio,
+        profile_picture_url: profileData.profilePicture
+    };
+
+    const res = await api.put('/user/profile', payload);
+    return res.data;
+};
+
+// Get user profile stats (optional)
+export const getUserProfileStats = async () => {
+    const res = await api.get('/user/profile/stats');
+    return res.data;
 };

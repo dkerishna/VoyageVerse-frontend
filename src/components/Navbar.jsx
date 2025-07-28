@@ -323,7 +323,7 @@ export default function AppNavbar({ onLoginClick, onSignupClick }) {
                     </Navbar.Collapse>
                 </Container>
 
-                <style jsx>{`
+                <style>{`
                     .active-nav {
                         background: linear-gradient(45deg, #667eea, #764ba2) !important;
                         color: white !important;

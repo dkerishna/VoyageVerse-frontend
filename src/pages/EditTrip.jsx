@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     getTripById,
@@ -44,6 +44,56 @@ export default function EditTrip() {
     // Destinations
     const [destinations, setDestinations] = useState([]);
 
+    // Google Maps state
+    const [mapLoaded, setMapLoaded] = useState(false);
+    const [selectedCityLocation, setSelectedCityLocation] = useState(null);
+
+    // Refs for Google Maps autocomplete
+    const cityAutocompleteRef = useRef(null);
+    const destinationRefs = useRef([]);
+    const cityMapRef = useRef(null);
+    const cityMapInstanceRef = useRef(null);
+    const cityMarkerRef = useRef(null);
+
+    // Load Google Maps Script
+    useEffect(() => {
+        const loadGoogleMapsScript = () => {
+            if (window.google && window.google.maps && window.google.maps.places) {
+                setMapLoaded(true);
+                return;
+            }
+
+            const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+            if (existingScript) {
+                const checkLoaded = () => {
+                    if (window.google && window.google.maps && window.google.maps.places) {
+                        setMapLoaded(true);
+                    } else {
+                        setTimeout(checkLoaded, 100);
+                    }
+                };
+                checkLoaded();
+                return;
+            }
+
+            const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+            if (!apiKey) {
+                console.error('Google Maps API key not found. Please add VITE_GOOGLE_MAPS_API_KEY to your .env file');
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+            script.async = true;
+            script.defer = true;
+            script.onload = () => setMapLoaded(true);
+            script.onerror = () => console.error('Failed to load Google Maps script');
+            document.head.appendChild(script);
+        };
+
+        loadGoogleMapsScript();
+    }, []);
+
     useEffect(() => {
         const fetchTripAndDestinations = async () => {
             try {
@@ -75,6 +125,159 @@ export default function EditTrip() {
         fetchTripAndDestinations();
     }, [id]);
 
+    // Initialize Google Maps for city field
+    useEffect(() => {
+        if (!mapLoaded || !cityAutocompleteRef.current) return;
+
+        const cityAutocomplete = new window.google.maps.places.Autocomplete(
+            cityAutocompleteRef.current,
+            {
+                types: ['(cities)'],
+                fields: ['place_id', 'formatted_address', 'geometry', 'name', 'address_components']
+            }
+        );
+
+        cityAutocomplete.addListener('place_changed', () => {
+            const place = cityAutocomplete.getPlace();
+
+            if (place.geometry && place.geometry.location) {
+                const location = {
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng()
+                };
+
+                // Extract country and city from place
+                let extractedCountry = '';
+                let extractedCity = '';
+
+                if (place.address_components) {
+                    for (const component of place.address_components) {
+                        if (component.types.includes('country')) {
+                            extractedCountry = component.long_name;
+                        }
+                        if (component.types.includes('locality') || component.types.includes('administrative_area_level_1')) {
+                            extractedCity = component.long_name;
+                        }
+                    }
+                }
+
+                setFormData(prev => ({
+                    ...prev,
+                    country: extractedCountry || prev.country,
+                    city: extractedCity || place.name || prev.city
+                }));
+                setSelectedCityLocation(location);
+
+                // Update city map
+                if (cityMapInstanceRef.current) {
+                    cityMapInstanceRef.current.setCenter(location);
+                    cityMapInstanceRef.current.setZoom(10);
+
+                    // Add/update marker
+                    if (cityMarkerRef.current) {
+                        cityMarkerRef.current.setMap(null);
+                    }
+
+                    cityMarkerRef.current = new window.google.maps.Marker({
+                        position: location,
+                        map: cityMapInstanceRef.current,
+                        title: place.name || 'Selected City',
+                        icon: {
+                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                                    <circle cx="16" cy="16" r="8" fill="#ffd89b" stroke="white" stroke-width="3"/>
+                                </svg>
+                            `),
+                            scaledSize: new window.google.maps.Size(32, 32)
+                        }
+                    });
+                }
+            }
+        });
+    }, [mapLoaded]);
+
+    // Initialize city map
+    useEffect(() => {
+        if (!mapLoaded || !cityMapRef.current) return;
+
+        const defaultLocation = selectedCityLocation || { lat: 3.1390, lng: 101.6869 };
+
+        cityMapInstanceRef.current = new window.google.maps.Map(cityMapRef.current, {
+            center: defaultLocation,
+            zoom: selectedCityLocation ? 10 : 2,
+            styles: [
+                {
+                    featureType: 'all',
+                    elementType: 'geometry.fill',
+                    stylers: [{ color: '#f5f5f5' }]
+                },
+                {
+                    featureType: 'water',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#667eea' }]
+                },
+                {
+                    featureType: 'landscape',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#f9f9f9' }]
+                }
+            ]
+        });
+
+        if (selectedCityLocation && cityMarkerRef.current) {
+            cityMarkerRef.current.setMap(cityMapInstanceRef.current);
+        }
+    }, [mapLoaded, selectedCityLocation]);
+
+    // Initialize destination autocomplete for new fields
+    const initializeDestinationAutocomplete = useCallback((index) => {
+        if (!mapLoaded) return;
+
+        setTimeout(() => {
+            const ref = destinationRefs.current[index];
+            if (!ref || ref.dataset.autocompleteInitialized) return;
+
+            const autocomplete = new window.google.maps.places.Autocomplete(ref, {
+                fields: ['place_id', 'formatted_address', 'geometry', 'name']
+            });
+
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+
+                if (place.geometry && place.geometry.location) {
+                    const location = {
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng()
+                    };
+
+                    setDestinations(prevDestinations => {
+                        const newDestinations = [...prevDestinations];
+                        if (newDestinations[index]) {
+                            newDestinations[index] = {
+                                ...newDestinations[index],
+                                address: place.formatted_address || place.name,
+                                location_lat: location.lat,
+                                location_lng: location.lng
+                            };
+                        }
+                        return newDestinations;
+                    });
+                }
+            });
+
+            ref.dataset.autocompleteInitialized = 'true';
+        }, 100);
+    }, [mapLoaded]);
+
+    // Initialize autocomplete for existing destinations when maps load
+    useEffect(() => {
+        if (!mapLoaded) return;
+
+        for (let i = 0; i < destinations.length; i++) {
+            initializeDestinationAutocomplete(i);
+        }
+    }, [mapLoaded, destinations.length, initializeDestinationAutocomplete]);
+
     const handleTripChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData((prev) => ({
@@ -99,17 +302,25 @@ export default function EditTrip() {
     };
 
     const addDestinationField = () => {
+        const newIndex = destinations.length;
         setDestinations([...destinations, {
             name: '',
             description: '',
             destination_type: '',
             address: '',
+            location_lat: null,
+            location_lng: null,
             visit_date: '',
             visit_time: '',
             price_range: '',
             priority_level: 3,
             isNew: true
         }]);
+
+        // Initialize autocomplete for the new field
+        setTimeout(() => {
+            initializeDestinationAutocomplete(newIndex);
+        }, 100);
     };
 
     const removeDestinationField = async (index) => {
@@ -117,6 +328,8 @@ export default function EditTrip() {
         if (dest.isNew) {
             // Just remove from UI if it's a new destination
             setDestinations(destinations.filter((_, i) => i !== index));
+            // Clean up refs
+            destinationRefs.current.splice(index, 1);
         } else {
             // Delete from database if it's an existing destination
             if (window.confirm('Are you sure you want to delete this destination?')) {
@@ -149,14 +362,18 @@ export default function EditTrip() {
                     await addDestination(id, {
                         ...dest,
                         order_index: i + 1,
-                        priority_level: parseInt(dest.priority_level) || 3
+                        priority_level: parseInt(dest.priority_level) || 3,
+                        location_lat: dest.location_lat,
+                        location_lng: dest.location_lng
                     });
                 } else if (!dest.isNew && dest.id) {
                     // Update existing destination
                     await updateDestinationAPI(dest.id, {
                         ...dest,
                         order_index: i + 1,
-                        priority_level: parseInt(dest.priority_level) || 3
+                        priority_level: parseInt(dest.priority_level) || 3,
+                        location_lat: dest.location_lat,
+                        location_lng: dest.location_lng
                     });
                 }
             }
@@ -205,7 +422,7 @@ export default function EditTrip() {
                         </p>
                     </div>
                 </div>
-                <style jsx>{`
+                <style>{`
                     @keyframes spin {
                         0% { transform: rotate(0deg); }
                         100% { transform: rotate(360deg); }
@@ -445,9 +662,10 @@ export default function EditTrip() {
                                         <Col md={6}>
                                             <Form.Group className="mb-3">
                                                 <Form.Label style={{ color: 'white', fontWeight: '500' }}>
-                                                    City
+                                                    City 🗺️
                                                 </Form.Label>
                                                 <Form.Control
+                                                    ref={cityAutocompleteRef}
                                                     type="text"
                                                     name="city"
                                                     value={formData.city}
@@ -459,11 +677,29 @@ export default function EditTrip() {
                                                         color: 'white',
                                                         padding: '12px 16px'
                                                     }}
-                                                    placeholder="e.g., Tokyo"
+                                                    placeholder="Search for your destination city..."
                                                 />
                                             </Form.Group>
                                         </Col>
                                     </Row>
+
+                                    {/* City Map Preview */}
+                                    {mapLoaded && selectedCityLocation && (
+                                        <div className="mb-3">
+                                            <Form.Label style={{ color: 'white', fontWeight: '500' }}>
+                                                📍 Destination Preview
+                                            </Form.Label>
+                                            <div
+                                                ref={cityMapRef}
+                                                style={{
+                                                    height: '200px',
+                                                    borderRadius: '15px',
+                                                    border: '2px solid rgba(255,255,255,0.3)',
+                                                    overflow: 'hidden'
+                                                }}
+                                            />
+                                        </div>
+                                    )}
 
                                     <Row>
                                         <Col md={6}>
@@ -637,27 +873,25 @@ export default function EditTrip() {
                                                     position: 'relative'
                                                 }}
                                             >
-                                                {destinations.length > 0 && (
-                                                    <Button
-                                                        type="button"
-                                                        onClick={() => removeDestinationField(index)}
-                                                        style={{
-                                                            position: 'absolute',
-                                                            top: '10px',
-                                                            right: '10px',
-                                                            background: 'rgba(220, 53, 69, 0.3)',
-                                                            border: '1px solid rgba(220, 53, 69, 0.5)',
-                                                            color: 'white',
-                                                            borderRadius: '50%',
-                                                            width: '30px',
-                                                            height: '30px',
-                                                            padding: '0',
-                                                            fontSize: '0.8rem'
-                                                        }}
-                                                    >
-                                                        ×
-                                                    </Button>
-                                                )}
+                                                <Button
+                                                    type="button"
+                                                    onClick={() => removeDestinationField(index)}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '10px',
+                                                        right: '10px',
+                                                        background: 'rgba(220, 53, 69, 0.3)',
+                                                        border: '1px solid rgba(220, 53, 69, 0.5)',
+                                                        color: 'white',
+                                                        borderRadius: '50%',
+                                                        width: '30px',
+                                                        height: '30px',
+                                                        padding: '0',
+                                                        fontSize: '0.8rem'
+                                                    }}
+                                                >
+                                                    ×
+                                                </Button>
 
                                                 <Form.Group className="mb-3">
                                                     <Form.Label style={{ color: 'white', fontWeight: '500', fontSize: '0.9rem' }}>
@@ -727,9 +961,10 @@ export default function EditTrip() {
 
                                                 <Form.Group className="mb-3">
                                                     <Form.Label style={{ color: 'white', fontWeight: '500', fontSize: '0.9rem' }}>
-                                                        Address
+                                                        Address 🗺️
                                                     </Form.Label>
                                                     <Form.Control
+                                                        ref={(el) => destinationRefs.current[index] = el}
                                                         type="text"
                                                         value={dest.address || ''}
                                                         onChange={(e) => updateDestination(index, 'address', e.target.value)}
@@ -740,8 +975,13 @@ export default function EditTrip() {
                                                             color: 'white',
                                                             padding: '10px 12px'
                                                         }}
-                                                        placeholder="Full address or general location"
+                                                        placeholder="Search for specific address or location..."
                                                     />
+                                                    {dest.location_lat && dest.location_lng && (
+                                                        <small style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem' }}>
+                                                            📍 Location saved: {dest.location_lat.toFixed(4)}, {dest.location_lng.toFixed(4)}
+                                                        </small>
+                                                    )}
                                                 </Form.Group>
 
                                                 <Row>
@@ -936,7 +1176,7 @@ export default function EditTrip() {
                     </div>
                 </Container>
 
-                <style jsx>{`
+                <style>{`
                     @keyframes float {
                         0%, 100% { transform: translateY(0px) rotate(0deg); }
                         50% { transform: translateY(-20px) rotate(5deg); }
