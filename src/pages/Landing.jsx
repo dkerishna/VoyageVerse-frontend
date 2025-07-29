@@ -50,7 +50,7 @@ export default function Landing() {
             destination: "Paris → Rome → Berlin",
             date: "May 2025",
             emoji: "✈️",
-            image: "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=250&fit=crop",
+            image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=300&h=200&fit=crop",
             gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
         },
         {
@@ -82,7 +82,7 @@ export default function Landing() {
             destination: "Morocco Explorer",
             date: "October 2025",
             emoji: "🐪",
-            image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73273?w=400&h=250&fit=crop",
+            image: "https://images.unsplash.com/photo-1489493585363-d69421e0edd3?w=300&h=200&fit=crop",
             gradient: "linear-gradient(135deg, #fdcb6e 0%, #e17055 100%)"
         },
         {
@@ -90,7 +90,7 @@ export default function Landing() {
             destination: "Iceland & Norway",
             date: "February 2025",
             emoji: "🌌",
-            image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=250&fit=crop",
+            image: "https://plus.unsplash.com/premium_photo-1675756583711-ce312872227b?w=300&h=200&fit=crop",
             gradient: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)"
         },
         {
@@ -114,7 +114,7 @@ export default function Landing() {
             destination: "Brazil Rainforest",
             date: "November 2025",
             emoji: "🌿",
-            image: "https://images.unsplash.com/photo-1544731612-de7f96afe55f?w=400&h=250&fit=crop",
+            image: "https://images.unsplash.com/photo-1591081658714-f576fb7ea3ed?w=300&h=200&fit=crop",
             gradient: "linear-gradient(135deg, #00b894 0%, #00a085 100%)"
         }
     ];
