@@ -128,7 +128,7 @@ export default function Landing() {
             <div
                 className="landing-hero"
                 style={{
-                    height: '200vh',
+                    height: 'auto',
                     display: 'flex',
                     flexDirection: 'column',
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
