@@ -1152,9 +1152,9 @@ export default function EditTrip() {
                                                             >
                                                                 <option value="">Select price range</option>
                                                                 <option value="$">$ Budget-friendly</option>
-                                                                <option value="$">$ Moderate</option>
-                                                                <option value="$$">$$ Expensive</option>
-                                                                <option value="$$">$$ Luxury</option>
+                                                                <option value="$$">$$ Moderate</option>
+                                                                <option value="$$$">$$$ Expensive</option>
+                                                                <option value="$$$$">$$$$ Luxury</option>
                                                             </Form.Select>
                                                         </Form.Group>
                                                     </Col>
