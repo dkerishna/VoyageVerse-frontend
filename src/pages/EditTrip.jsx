@@ -17,14 +17,23 @@ import {
     Col,
     Alert
 } from 'react-bootstrap';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../firebase';
+import { v4 as uuidv4 } from 'uuid';
+import { useAuth } from '../contexts/useAuth';
 
 export default function EditTrip() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { currentUser } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    const [image, setImage] = useState(null);
+    const [currentImageUrl, setCurrentImageUrl] = useState('');
+    const [imageUploading, setImageUploading] = useState(false);
 
     // Trip form data
     const [formData, setFormData] = useState({
@@ -54,6 +63,12 @@ export default function EditTrip() {
     const cityMapRef = useRef(null);
     const cityMapInstanceRef = useRef(null);
     const cityMarkerRef = useRef(null);
+
+    const handleImageChange = (e) => {
+        if (e.target.files[0]) {
+            setImage(e.target.files[0]);
+        }
+    };
 
     // Load Google Maps Script
     useEffect(() => {
@@ -111,6 +126,8 @@ export default function EditTrip() {
                     is_favorite: trip.is_favorite || false,
                     trip_rating: trip.trip_rating || ''
                 });
+
+                setCurrentImageUrl(trip.image_url || '');
 
                 const dests = await getDestinationsByTripId(id);
                 setDestinations(dests);
@@ -290,12 +307,31 @@ export default function EditTrip() {
         e.preventDefault();
         try {
             setSaving(true);
-            await updateTrip(id, formData);
+            let imageUrl = currentImageUrl; // Keep existing image URL
+
+            // Upload new image if selected
+            if (image) {
+                setImageUploading(true);
+                const imageRef = ref(storage, `trips/${currentUser.uid}/${uuidv4()}-${image.name}`);
+                await uploadBytes(imageRef, image);
+                imageUrl = await getDownloadURL(imageRef);
+                setImageUploading(false);
+            }
+
+            // Update trip with image URL
+            await updateTrip(id, {
+                ...formData,
+                image_url: imageUrl
+            });
+
+            setCurrentImageUrl(imageUrl); // Update current image URL
+            setImage(null); // Clear selected image
             setSuccess('Trip updated successfully!');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             console.error('Error updating trip:', err);
             setError('Failed to update trip');
+            setImageUploading(false);
         } finally {
             setSaving(false);
         }
@@ -478,7 +514,7 @@ export default function EditTrip() {
                     {/* Header */}
                     <div className="d-flex align-items-center mb-4">
                         <Button
-                            onClick={() => navigate('/trip/:id')}
+                            onClick={() => navigate(`/trip/${id}`)} // Use the actual trip ID from useParams
                             style={{
                                 background: 'rgba(255,255,255,0.2)',
                                 border: '1px solid rgba(255,255,255,0.3)',
@@ -495,7 +531,7 @@ export default function EditTrip() {
                                 e.target.style.background = 'rgba(255,255,255,0.2)';
                             }}
                         >
-                            ← Back to Trips
+                            ← Back to Trip Details
                         </Button>
                         <h2
                             style={{
@@ -765,6 +801,78 @@ export default function EditTrip() {
                                                     }}
                                                     placeholder="e.g., 2500.00"
                                                 />
+                                            </Form.Group>
+                                            <Form.Group className="mb-3">
+                                                <Form.Label style={{ color: 'white', fontWeight: '500' }}>
+                                                    Trip Image (optional)
+                                                </Form.Label>
+
+                                                {/* Show current image if exists */}
+                                                {currentImageUrl && !image && (
+                                                    <div className="mb-2">
+                                                        <img
+                                                            src={currentImageUrl}
+                                                            alt="Current trip"
+                                                            style={{
+                                                                width: '100%',
+                                                                maxHeight: '200px',
+                                                                objectFit: 'cover',
+                                                                borderRadius: '12px',
+                                                                border: '2px solid rgba(255,255,255,0.3)'
+                                                            }}
+                                                        />
+                                                        <small style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem' }}>
+                                                            Current image - upload a new one to replace it
+                                                        </small>
+                                                    </div>
+                                                )}
+
+                                                {/* Show preview of new image if selected */}
+                                                {image && (
+                                                    <div className="mb-2">
+                                                        <img
+                                                            src={URL.createObjectURL(image)}
+                                                            alt="New trip preview"
+                                                            style={{
+                                                                width: '100%',
+                                                                maxHeight: '200px',
+                                                                objectFit: 'cover',
+                                                                borderRadius: '12px',
+                                                                border: '2px solid rgba(255,216,155,0.5)'
+                                                            }}
+                                                        />
+                                                        <small style={{ color: 'rgba(255,216,155,0.9)', fontSize: '0.8rem' }}>
+                                                            New image preview - save to apply changes
+                                                        </small>
+                                                    </div>
+                                                )}
+
+                                                <Form.Control
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageChange}
+                                                    style={{
+                                                        background: 'rgba(255,255,255,0.1)',
+                                                        border: '1px solid rgba(255,255,255,0.3)',
+                                                        borderRadius: '12px',
+                                                        color: 'white',
+                                                        padding: '12px 16px'
+                                                    }}
+                                                />
+
+                                                {imageUploading && (
+                                                    <div className="mt-2">
+                                                        <Spinner
+                                                            as="span"
+                                                            animation="border"
+                                                            size="sm"
+                                                            role="status"
+                                                            aria-hidden="true"
+                                                            style={{ marginRight: '10px' }}
+                                                        />
+                                                        <small style={{ color: 'white' }}>Uploading image...</small>
+                                                    </div>
+                                                )}
                                             </Form.Group>
                                         </Col>
                                         <Col md={6}>
@@ -1096,7 +1204,7 @@ export default function EditTrip() {
                                     <Col md={6}>
                                         <Button
                                             type="submit"
-                                            disabled={saving}
+                                            disabled={saving || imageUploading}
                                             style={{
                                                 background: saving
                                                     ? 'rgba(108, 117, 125, 0.3)'
@@ -1124,7 +1232,7 @@ export default function EditTrip() {
                                                 }
                                             }}
                                         >
-                                            {saving ? (
+                                            {saving || imageUploading ? (
                                                 <>
                                                     <Spinner
                                                         as="span"
@@ -1134,7 +1242,7 @@ export default function EditTrip() {
                                                         aria-hidden="true"
                                                         style={{ marginRight: '10px' }}
                                                     />
-                                                    Saving Trip...
+                                                    {imageUploading ? 'Uploading Image...' : 'Saving Trip...'}
                                                 </>
                                             ) : (
                                                 <>

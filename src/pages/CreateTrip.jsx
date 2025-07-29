@@ -41,6 +41,7 @@ const CreateTrip = () => {
 
     // Google Maps state
     const [mapLoaded, setMapLoaded] = useState(false);
+    const [mapsApiReady, setMapsApiReady] = useState(false);
     const [selectedCityLocation, setSelectedCityLocation] = useState(null);
 
     // Refs for Google Maps autocomplete
@@ -53,19 +54,23 @@ const CreateTrip = () => {
     const [error, setError] = useState('');
     const [uploading, setUploading] = useState(false);
 
-    // Load Google Maps Script
+    // Load Google Maps Script with better error handling
     useEffect(() => {
         const loadGoogleMapsScript = () => {
+            // Check if already loaded
             if (window.google && window.google.maps && window.google.maps.places) {
                 setMapLoaded(true);
+                setMapsApiReady(true);
                 return;
             }
 
+            // Check if script is already being loaded
             const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
             if (existingScript) {
                 const checkLoaded = () => {
                     if (window.google && window.google.maps && window.google.maps.places) {
                         setMapLoaded(true);
+                        setMapsApiReady(true);
                     } else {
                         setTimeout(checkLoaded, 100);
                     }
@@ -77,6 +82,7 @@ const CreateTrip = () => {
             const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
             if (!apiKey) {
                 console.error('Google Maps API key not found. Please add VITE_GOOGLE_MAPS_API_KEY to your .env file');
+                setError('Google Maps API key not configured. Please contact support.');
                 return;
             }
 
@@ -84,129 +90,52 @@ const CreateTrip = () => {
             script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
             script.async = true;
             script.defer = true;
-            script.onload = () => setMapLoaded(true);
-            script.onerror = () => console.error('Failed to load Google Maps script');
+
+            script.onload = () => {
+                // Additional check to ensure all APIs are available
+                const checkComplete = () => {
+                    if (window.google && window.google.maps && window.google.maps.places && window.google.maps.places.Autocomplete) {
+                        setMapLoaded(true);
+                        setMapsApiReady(true);
+                    } else {
+                        setTimeout(checkComplete, 50);
+                    }
+                };
+                checkComplete();
+            };
+
+            script.onerror = (error) => {
+                console.error('Failed to load Google Maps script:', error);
+                setError('Failed to load Google Maps. Please check your internet connection and try again.');
+            };
+
             document.head.appendChild(script);
         };
 
         loadGoogleMapsScript();
     }, []);
 
-    // Initialize Google Maps for city field
+    // Initialize Google Maps for city field with better safety checks
     useEffect(() => {
-        if (!mapLoaded || !cityAutocompleteRef.current) return;
+        if (!mapsApiReady || !mapLoaded || !cityAutocompleteRef.current) return;
 
-        const cityAutocomplete = new window.google.maps.places.Autocomplete(
-            cityAutocompleteRef.current,
-            {
-                types: ['(cities)'],
-                fields: ['place_id', 'formatted_address', 'geometry', 'name', 'address_components']
+        try {
+            // Double-check that the API is fully available
+            if (!window.google.maps.places.Autocomplete) {
+                console.error('Google Maps Places Autocomplete not available');
+                return;
             }
-        );
 
-        cityAutocomplete.addListener('place_changed', () => {
-            const place = cityAutocomplete.getPlace();
-
-            if (place.geometry && place.geometry.location) {
-                const location = {
-                    lat: place.geometry.location.lat(),
-                    lng: place.geometry.location.lng()
-                };
-
-                // Extract country and city from place
-                let extractedCountry = '';
-                let extractedCity = '';
-
-                if (place.address_components) {
-                    for (const component of place.address_components) {
-                        if (component.types.includes('country')) {
-                            extractedCountry = component.long_name;
-                        }
-                        if (component.types.includes('locality') || component.types.includes('administrative_area_level_1')) {
-                            extractedCity = component.long_name;
-                        }
-                    }
-                }
-
-                setCountry(extractedCountry || country);
-                setCity(extractedCity || place.name || city);
-                setSelectedCityLocation(location);
-
-                // Update city map
-                if (cityMapInstanceRef.current) {
-                    cityMapInstanceRef.current.setCenter(location);
-                    cityMapInstanceRef.current.setZoom(10);
-
-                    // Add/update marker
-                    if (cityMarkerRef.current) {
-                        cityMarkerRef.current.setMap(null);
-                    }
-
-                    cityMarkerRef.current = new window.google.maps.Marker({
-                        position: location,
-                        map: cityMapInstanceRef.current,
-                        title: place.name || 'Selected City',
-                        icon: {
-                            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                                    <circle cx="16" cy="16" r="8" fill="#ffd89b" stroke="white" stroke-width="3"/>
-                                </svg>
-                            `),
-                            scaledSize: new window.google.maps.Size(32, 32)
-                        }
-                    });
-                }
-            }
-        });
-    }, [mapLoaded, country, city]);
-
-    // Initialize city map
-    useEffect(() => {
-        if (!mapLoaded || !cityMapRef.current) return;
-
-        const defaultLocation = selectedCityLocation || { lat: 3.1390, lng: 101.6869 };
-
-        cityMapInstanceRef.current = new window.google.maps.Map(cityMapRef.current, {
-            center: defaultLocation,
-            zoom: selectedCityLocation ? 10 : 2,
-            styles: [
+            const cityAutocomplete = new window.google.maps.places.Autocomplete(
+                cityAutocompleteRef.current,
                 {
-                    featureType: 'all',
-                    elementType: 'geometry.fill',
-                    stylers: [{ color: '#f5f5f5' }]
-                },
-                {
-                    featureType: 'water',
-                    elementType: 'geometry',
-                    stylers: [{ color: '#667eea' }]
-                },
-                {
-                    featureType: 'landscape',
-                    elementType: 'geometry',
-                    stylers: [{ color: '#f9f9f9' }]
+                    types: ['(cities)'],
+                    fields: ['place_id', 'formatted_address', 'geometry', 'name', 'address_components']
                 }
-            ]
-        });
+            );
 
-        if (selectedCityLocation && cityMarkerRef.current) {
-            cityMarkerRef.current.setMap(cityMapInstanceRef.current);
-        }
-    }, [mapLoaded, selectedCityLocation]);
-
-    // Initialize destination autocomplete for new fields
-    const initializeDestinationAutocomplete = useCallback((index) => {
-        if (!mapLoaded) return;
-
-        setTimeout(() => {
-            const ref = destinationRefs.current[index];
-            if (!ref || ref.dataset.autocompleteInitialized) return;
-
-            const autocomplete = new window.google.maps.places.Autocomplete(ref, {
-                fields: ['place_id', 'formatted_address', 'geometry', 'name']
-            });
-
-            autocomplete.addListener('place_changed', () => {
-                const place = autocomplete.getPlace();
+            cityAutocomplete.addListener('place_changed', () => {
+                const place = cityAutocomplete.getPlace();
 
                 if (place.geometry && place.geometry.location) {
                     const location = {
@@ -214,33 +143,152 @@ const CreateTrip = () => {
                         lng: place.geometry.location.lng()
                     };
 
-                    setDestinations(prevDestinations => {
-                        const newDestinations = [...prevDestinations];
-                        if (newDestinations[index]) {
-                            newDestinations[index] = {
-                                ...newDestinations[index],
-                                address: place.formatted_address || place.name,
-                                location_lat: location.lat,
-                                location_lng: location.lng
-                            };
+                    // Extract country and city from place
+                    let extractedCountry = '';
+                    let extractedCity = '';
+
+                    if (place.address_components) {
+                        for (const component of place.address_components) {
+                            if (component.types.includes('country')) {
+                                extractedCountry = component.long_name;
+                            }
+                            if (component.types.includes('locality') || component.types.includes('administrative_area_level_1')) {
+                                extractedCity = component.long_name;
+                            }
                         }
-                        return newDestinations;
-                    });
+                    }
+
+                    setCountry(extractedCountry || country);
+                    setCity(extractedCity || place.name || city);
+                    setSelectedCityLocation(location);
+
+                    // Update city map
+                    if (cityMapInstanceRef.current) {
+                        cityMapInstanceRef.current.setCenter(location);
+                        cityMapInstanceRef.current.setZoom(10);
+
+                        // Add/update marker
+                        if (cityMarkerRef.current) {
+                            cityMarkerRef.current.setMap(null);
+                        }
+
+                        cityMarkerRef.current = new window.google.maps.Marker({
+                            position: location,
+                            map: cityMapInstanceRef.current,
+                            title: place.name || 'Selected City',
+                            icon: {
+                                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                                        <circle cx="16" cy="16" r="8" fill="#ffd89b" stroke="white" stroke-width="3"/>
+                                    </svg>
+                                `),
+                                scaledSize: new window.google.maps.Size(32, 32)
+                            }
+                        });
+                    }
                 }
             });
+        } catch (error) {
+            console.error('Error initializing city autocomplete:', error);
+            setError('Error initializing location search. Please refresh the page.');
+        }
+    }, [mapsApiReady, mapLoaded, country, city]);
 
-            ref.dataset.autocompleteInitialized = 'true';
+    // Initialize city map with better error handling
+    useEffect(() => {
+        if (!mapsApiReady || !mapLoaded || !cityMapRef.current) return;
+
+        try {
+            const defaultLocation = selectedCityLocation || { lat: 3.1390, lng: 101.6869 };
+
+            cityMapInstanceRef.current = new window.google.maps.Map(cityMapRef.current, {
+                center: defaultLocation,
+                zoom: selectedCityLocation ? 10 : 2,
+                styles: [
+                    {
+                        featureType: 'all',
+                        elementType: 'geometry.fill',
+                        stylers: [{ color: '#f5f5f5' }]
+                    },
+                    {
+                        featureType: 'water',
+                        elementType: 'geometry',
+                        stylers: [{ color: '#667eea' }]
+                    },
+                    {
+                        featureType: 'landscape',
+                        elementType: 'geometry',
+                        stylers: [{ color: '#f9f9f9' }]
+                    }
+                ]
+            });
+
+            if (selectedCityLocation && cityMarkerRef.current) {
+                cityMarkerRef.current.setMap(cityMapInstanceRef.current);
+            }
+        } catch (error) {
+            console.error('Error initializing city map:', error);
+        }
+    }, [mapsApiReady, mapLoaded, selectedCityLocation]);
+
+    // Initialize destination autocomplete for new fields with better error handling
+    const initializeDestinationAutocomplete = useCallback((index) => {
+        if (!mapsApiReady || !mapLoaded) return;
+
+        setTimeout(() => {
+            try {
+                const ref = destinationRefs.current[index];
+                if (!ref || ref.dataset.autocompleteInitialized) return;
+
+                // Check if API is still available
+                if (!window.google?.maps?.places?.Autocomplete) {
+                    console.error('Google Maps Places API not available for destination autocomplete');
+                    return;
+                }
+
+                const autocomplete = new window.google.maps.places.Autocomplete(ref, {
+                    fields: ['place_id', 'formatted_address', 'geometry', 'name']
+                });
+
+                autocomplete.addListener('place_changed', () => {
+                    const place = autocomplete.getPlace();
+
+                    if (place.geometry && place.geometry.location) {
+                        const location = {
+                            lat: place.geometry.location.lat(),
+                            lng: place.geometry.location.lng()
+                        };
+
+                        setDestinations(prevDestinations => {
+                            const newDestinations = [...prevDestinations];
+                            if (newDestinations[index]) {
+                                newDestinations[index] = {
+                                    ...newDestinations[index],
+                                    address: place.formatted_address || place.name,
+                                    location_lat: location.lat,
+                                    location_lng: location.lng
+                                };
+                            }
+                            return newDestinations;
+                        });
+                    }
+                });
+
+                ref.dataset.autocompleteInitialized = 'true';
+            } catch (error) {
+                console.error('Error initializing destination autocomplete:', error);
+            }
         }, 100);
-    }, [mapLoaded]);
+    }, [mapsApiReady, mapLoaded]);
 
     // Initialize autocomplete for existing destinations when maps load
     useEffect(() => {
-        if (!mapLoaded) return;
+        if (!mapsApiReady || !mapLoaded) return;
 
         for (let i = 0; i < destinations.length; i++) {
             initializeDestinationAutocomplete(i);
         }
-    }, [mapLoaded, destinations.length, initializeDestinationAutocomplete]);
+    }, [mapsApiReady, mapLoaded, destinations.length, initializeDestinationAutocomplete]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -381,7 +429,7 @@ const CreateTrip = () => {
                     {/* Header */}
                     <div className="d-flex align-items-center mb-4">
                         <Button
-                            onClick={() => navigate('/trip/:id')}
+                            onClick={() => navigate('/dashboard')}
                             style={{
                                 background: 'rgba(255,255,255,0.2)',
                                 border: '1px solid rgba(255,255,255,0.3)',
@@ -412,6 +460,30 @@ const CreateTrip = () => {
                             Create New Trip ✈️
                         </h2>
                     </div>
+
+                    {/* Loading indicator for Google Maps */}
+                    {!mapsApiReady && !error && (
+                        <Alert
+                            variant="info"
+                            style={{
+                                background: 'rgba(13, 202, 240, 0.2)',
+                                border: '1px solid rgba(13, 202, 240, 0.3)',
+                                color: 'white',
+                                borderRadius: '15px',
+                                marginBottom: '1rem'
+                            }}
+                        >
+                            <Spinner
+                                as="span"
+                                animation="border"
+                                size="sm"
+                                role="status"
+                                aria-hidden="true"
+                                style={{ marginRight: '10px' }}
+                            />
+                            Loading location services...
+                        </Alert>
+                    )}
 
                     {/* Main Form Card */}
                     <div
@@ -543,6 +615,11 @@ const CreateTrip = () => {
                                             <Form.Group className="mb-3">
                                                 <Form.Label style={{ color: 'white', fontWeight: '500' }}>
                                                     City 🗺️
+                                                    {!mapsApiReady && (
+                                                        <small style={{ color: 'rgba(255,255,255,0.7)', marginLeft: '5px' }}>
+                                                            (Loading location search...)
+                                                        </small>
+                                                    )}
                                                 </Form.Label>
                                                 <Form.Control
                                                     ref={cityAutocompleteRef}
@@ -556,14 +633,15 @@ const CreateTrip = () => {
                                                         color: 'white',
                                                         padding: '12px 16px'
                                                     }}
-                                                    placeholder="Search for your destination city..."
+                                                    placeholder={mapsApiReady ? "Search for your destination city..." : "Enter city name..."}
+                                                    disabled={!mapsApiReady}
                                                 />
                                             </Form.Group>
                                         </Col>
                                     </Row>
 
                                     {/* City Map Preview */}
-                                    {mapLoaded && selectedCityLocation && (
+                                    {mapsApiReady && selectedCityLocation && (
                                         <div className="mb-3">
                                             <Form.Label style={{ color: 'white', fontWeight: '500' }}>
                                                 📍 Destination Preview
@@ -813,6 +891,11 @@ const CreateTrip = () => {
                                                 <Form.Group className="mb-3">
                                                     <Form.Label style={{ color: 'white', fontWeight: '500', fontSize: '0.9rem' }}>
                                                         Address 🗺️
+                                                        {!mapsApiReady && (
+                                                            <small style={{ color: 'rgba(255,255,255,0.7)', marginLeft: '5px' }}>
+                                                                (Location search loading...)
+                                                            </small>
+                                                        )}
                                                     </Form.Label>
                                                     <Form.Control
                                                         ref={(el) => destinationRefs.current[index] = el}
@@ -826,7 +909,8 @@ const CreateTrip = () => {
                                                             color: 'white',
                                                             padding: '10px 12px'
                                                         }}
-                                                        placeholder="Search for specific address or location..."
+                                                        placeholder={mapsApiReady ? "Search for specific address or location..." : "Enter address..."}
+                                                        disabled={!mapsApiReady}
                                                     />
                                                     {dest.location_lat && dest.location_lng && (
                                                         <small style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem' }}>
