@@ -80,13 +80,17 @@ export default function MyAccount() {
 
     // Initialize Google Maps and Autocomplete
     useEffect(() => {
-        if (!mapLoaded || !isEditing || !autocompleteRef.current || !mapRef.current) {
+        if (!mapLoaded || !mapRef.current || !(isEditing || profileData.location)) {
             return;
         }
 
         const addMarker = (location) => {
             if (markerRef.current) {
                 markerRef.current.setMap(null);
+            }
+            // Only check autocomplete ref when editing
+            if (isEditing && !autocompleteRef.current) {
+                return;
             }
 
             markerRef.current = new window.google.maps.Marker({
@@ -216,7 +220,7 @@ export default function MyAccount() {
                 markerRef.current = null;
             }
         };
-    }, [mapLoaded, isEditing, selectedLocation]);
+    }, [mapLoaded, isEditing, selectedLocation, profileData.location]);
 
 
 
