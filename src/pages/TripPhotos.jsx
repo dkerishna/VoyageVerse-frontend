@@ -219,7 +219,7 @@ export default function TripPhotos() {
                                 🔄 Try Again
                             </Button>
                             <Button
-                                onClick={() => navigate('/dashboard')}
+                                onClick={() => navigate(`/trip/${tripId}`)}
                                 style={{
                                     background: 'rgba(255,255,255,0.2)',
                                     border: '1px solid rgba(255,255,255,0.3)',
@@ -229,7 +229,7 @@ export default function TripPhotos() {
                                     fontWeight: '600'
                                 }}
                             >
-                                ← Back to Dashboard
+                                ← Back to Trip Details
                             </Button>
                         </div>
                     </div>
@@ -285,7 +285,7 @@ export default function TripPhotos() {
                     <div className="d-flex align-items-center justify-content-between mb-4">
                         <div className="d-flex align-items-center">
                             <Button
-                                onClick={() => navigate('/dashboard')}
+                                onClick={() => navigate(`/trip/${tripId}`)}
                                 style={{
                                     background: 'rgba(255,255,255,0.2)',
                                     border: '1px solid rgba(255,255,255,0.3)',
@@ -302,7 +302,7 @@ export default function TripPhotos() {
                                     e.target.style.background = 'rgba(255,255,255,0.2)';
                                 }}
                             >
-                                ← Back to Dashboard
+                                ← Back to Trip Details
                             </Button>
                             <div>
                                 <h2
@@ -659,7 +659,7 @@ export default function TripPhotos() {
                                 Start capturing memories! Photos will appear here as you add them to your trip.
                             </p>
                             <Button
-                                onClick={() => navigate(`/trips/${trip.id}/photos`)}
+                                onClick={() => navigate(`/trip/${trip.id}`)}
                                 style={{
                                     background: 'linear-gradient(45deg, #ffd89b, #19547b)',
                                     border: 'none',
@@ -669,7 +669,7 @@ export default function TripPhotos() {
                                     fontWeight: '600'
                                 }}
                             >
-                                📤 Upload Photos
+                                📤 Upload Photos in Trip Details
                             </Button>
                         </div>
                     )}
