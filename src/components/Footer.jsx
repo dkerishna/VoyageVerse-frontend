@@ -45,7 +45,7 @@ export default function AppFooter() {
                                 }}
                             >
                                 <span style={{ fontSize: '1.2rem' }}>✈️</span>
-                                TravelCompanion
+                                VoyageVerse
                             </div>
                             <p
                                 style={{
@@ -55,8 +55,7 @@ export default function AppFooter() {
                                     marginBottom: '1.5rem'
                                 }}
                             >
-                                Your ultimate travel planning companion. Create amazing trips,
-                                organize destinations, and capture memories all in one place.
+                                Organize your adventures, capture precious moments, and build a digital travel journal that grows with every journey.
                             </p>
 
                             {/* Social Media Icons */}
@@ -491,7 +490,7 @@ export default function AppFooter() {
                                     margin: 0
                                 }}
                             >
-                                © {currentYear} TravelCompanion. All rights reserved.
+                                © {currentYear} VoyageVerse. All rights reserved.
                             </p>
                         </Col>
                         <Col md={6} className="text-md-end">

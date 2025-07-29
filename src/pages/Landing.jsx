@@ -437,7 +437,7 @@ export default function Landing() {
                                         marginBottom: 0
                                     }}
                                 >
-                                    Sign up to start planning your adventure!
+                                    Sign up to start documenting your adventures!
                                 </p>
                             </div>
                         </div>
