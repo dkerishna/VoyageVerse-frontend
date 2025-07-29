@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navbar, Nav, Container, Button, NavDropdown } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { useAuth } from '../contexts/useAuth';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -166,62 +166,65 @@ export default function AppNavbar({ onLoginClick, onSignupClick }) {
                                 </Nav.Link> */}
 
                                 {/* More Dropdown */}
-                                <NavDropdown
-                                    title={
-                                        <span style={{
-                                            color: '#2c3e50',
-                                            fontWeight: '600',
-                                            fontSize: '1rem'
-                                        }}>
-                                            ⋯ More
-                                        </span>
-                                    }
-                                    id="more-nav-dropdown"
+                                <Nav.Link
+                                    as={Link}
+                                    to="/account"
                                     style={{
-                                        margin: '0 5px'
+                                        color: '#2c3e50',
+                                        fontWeight: '600',
+                                        fontSize: '1rem',
+                                        padding: '8px 20px',
+                                        borderRadius: '20px',
+                                        margin: '0 5px',
+                                        transition: 'all 0.3s ease',
+                                        textDecoration: 'none'
+                                    }}
+                                    className={location.pathname === '/account' ? 'active-nav' : ''}
+                                    onMouseEnter={(e) => {
+                                        if (!e.target.classList.contains('active-nav')) {
+                                            e.target.style.background = 'rgba(102, 126, 234, 0.1)';
+                                            e.target.style.color = '#667eea';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!e.target.classList.contains('active-nav')) {
+                                            e.target.style.background = 'transparent';
+                                            e.target.style.color = '#2c3e50';
+                                        }
                                     }}
                                 >
-                                    <NavDropdown.Item
-                                        as={Link}
-                                        to="/account"
-                                        style={{
-                                            color: '#2c3e50',
-                                            fontWeight: '500',
-                                            padding: '10px 20px',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
+                                    👤 My Account
+                                </Nav.Link>
+
+                                <Nav.Link
+                                    as={Link}
+                                    to="/contact"
+                                    style={{
+                                        color: '#2c3e50',
+                                        fontWeight: '600',
+                                        fontSize: '1rem',
+                                        padding: '8px 20px',
+                                        borderRadius: '20px',
+                                        margin: '0 5px',
+                                        transition: 'all 0.3s ease',
+                                        textDecoration: 'none'
+                                    }}
+                                    className={location.pathname === '/contact' ? 'active-nav' : ''}
+                                    onMouseEnter={(e) => {
+                                        if (!e.target.classList.contains('active-nav')) {
                                             e.target.style.background = 'rgba(102, 126, 234, 0.1)';
                                             e.target.style.color = '#667eea';
-                                        }}
-                                        onMouseLeave={(e) => {
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!e.target.classList.contains('active-nav')) {
                                             e.target.style.background = 'transparent';
                                             e.target.style.color = '#2c3e50';
-                                        }}
-                                    >
-                                        👤 My Account
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item
-                                        as={Link}
-                                        to="/contact"
-                                        style={{
-                                            color: '#2c3e50',
-                                            fontWeight: '500',
-                                            padding: '10px 20px',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.target.style.background = 'rgba(102, 126, 234, 0.1)';
-                                            e.target.style.color = '#667eea';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.target.style.background = 'transparent';
-                                            e.target.style.color = '#2c3e50';
-                                        }}
-                                    >
-                                        📞 Contact & Help
-                                    </NavDropdown.Item>
-                                </NavDropdown>
+                                        }
+                                    }}
+                                >
+                                    📞 Contact & Help
+                                </Nav.Link>
                             </Nav>
                         )}
 

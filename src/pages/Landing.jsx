@@ -184,13 +184,21 @@ export default function Landing() {
                                 <h1
                                     className="fw-bold mb-3 mb-lg-4"
                                     style={{
-                                        color: 'white',
                                         textShadow: '0 4px 20px rgba(0,0,0,0.3)',
                                         lineHeight: '1.1',
                                         fontSize: 'clamp(2rem, 8vw, 4rem)'
                                     }}
                                 >
-                                    VoyageVerse<br />
+                                    <span
+                                        style={{
+                                            background: 'linear-gradient(45deg, #ffd89b, #ff9a9e)',
+                                            WebkitBackgroundClip: 'text',
+                                            WebkitTextFillColor: 'transparent',
+                                            backgroundClip: 'text'
+                                        }}
+                                    >
+                                        VoyageVerse
+                                    </span><br />
                                     <span
                                         style={{
                                             background: 'linear-gradient(45deg, #ffd89b, #19547b)',
@@ -219,7 +227,7 @@ export default function Landing() {
                                         lineHeight: '1.6'
                                     }}
                                 >
-                                    Plan unforgettable journeys, explore hidden gems, and preserve your most precious travel memories forever.
+                                    Organize your adventures, capture precious moments, and build a digital travel journal that grows with every journey.
                                 </p>
                             </div>
 
@@ -294,10 +302,10 @@ export default function Landing() {
                                 }}
                             >
                                 <h3 className="text-white mb-4 text-center" style={{ fontSize: '2rem', fontWeight: '700' }}>
-                                    ✨ Discover Amazing Journeys
+                                    ✨ Capture Every Adventure
                                 </h3>
                                 <p className="text-center text-white mb-4" style={{ opacity: 0.8 }}>
-                                    Join thousands of travelers exploring the world
+                                    Where travel memories find their perfect home
                                 </p>
                             </div>
 
@@ -513,9 +521,9 @@ export default function Landing() {
                                     e.currentTarget.style.transform = 'translateY(0)';
                                 }}
                             >
-                                <div style={{ color: 'white', fontSize: '3rem', marginBottom: '1rem' }}>🌟</div>
-                                <h5 style={{ color: 'white', fontWeight: '600' }}>Hidden Gems</h5>
-                                <p style={{ color: 'rgba(255,255,255,0.8)' }}>Discover off-the-beaten-path destinations</p>
+                                <div style={{ color: 'white', fontSize: '3rem', marginBottom: '1rem' }}>🌦️</div>
+                                <h5 style={{ color: 'white', fontWeight: '600' }}>Climate Check</h5>
+                                <p style={{ color: 'rgba(255,255,255,0.8)' }}>Stay prepared for every adventure</p>
                                 <p style={{ color: 'rgba(255, 59, 59, 0.8)' }}>Coming Soon!</p>
                             </div>
                         </div>
