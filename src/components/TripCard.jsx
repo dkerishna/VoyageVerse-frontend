@@ -376,7 +376,7 @@ export default function TripCard({ trip }) {
                             }}
                         >
                             <span>📷</span>
-                            Photos ({photos.length})
+                            Photos
                         </button>
                     )}
                 </div>
